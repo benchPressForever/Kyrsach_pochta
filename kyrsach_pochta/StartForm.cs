@@ -19,7 +19,9 @@ namespace kyrsach_pochta
 
         private void button1_Click(object sender, EventArgs e)
         {
-
+            Form LoginForm = new LoginClientForm(this);
+            LoginForm.Show();
+            this.Hide();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -32,6 +34,13 @@ namespace kyrsach_pochta
         private void StartForm_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Form LoginEmployerForm = new LoginEmployeeForm(this);
+            LoginEmployerForm.Show();
+            this.Hide();
         }
     }
 }

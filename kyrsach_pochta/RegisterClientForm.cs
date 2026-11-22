@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BCrypt;
 
 namespace kyrsach_pochta
 {
@@ -16,7 +17,7 @@ namespace kyrsach_pochta
         public RegisterClientForm(StartForm form)
         {
             InitializeComponent();
-           startForm = form;
+            startForm = form;
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -33,17 +34,54 @@ namespace kyrsach_pochta
             string fio = textBoxFIO.Text.Trim();
             string number = textBoxNumber.Text.Trim();
 
+            if (password != password2)
+            {
+                MessageBox.Show($"Ошибка при регистрации: Пароли не совпадают !!!", "Ошибка");
+                textBoxPassword.Focus();
+                return;
+            }
+
+
+            try
+            {
+                var existingEmail = kyrsachDataSet.Клиент.FirstOrDefault(c => c.Электронная_почта == email);
+                if (existingEmail != null)
+                {
+                    MessageBox.Show("Пользователь с таким email уже зарегистрирован!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    textBoxEmail.Clear();
+                    textBoxEmail.Focus();
+                    return;
+                }
+
+                var existingPhone = kyrsachDataSet.Клиент.FirstOrDefault(c => c.Телефон == number);
+                if (existingPhone != null)
+                {
+                    MessageBox.Show("Пользователь с таким телефоном уже зарегистрирован!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    textBoxNumber.Clear();
+                    textBoxNumber.Focus();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при проверке данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             try
             {
                 var newRow = kyrsachDataSet.Клиент.NewКлиентRow();
-                newRow.Пароль = password;
+                newRow.Пароль = BCrypt.Net.BCrypt.HashPassword(password);
                 newRow.Телефон = number;
                 newRow.ФИО = fio;
                 newRow.Электронная_почта = email;
                 kyrsachDataSet.Клиент.AddКлиентRow(newRow);
                 клиентTableAdapter.Update(kyrsachDataSet.Клиент);
                 MessageBox.Show("Регистрация успешна!", "Успех");
+
+                Form actionForm = new ActionClientForm(startForm);
+                actionForm.Show();
+                this.Hide();
             }
             catch(Exception ex) {
                 MessageBox.Show($"Ошибка при регистрации: {ex.Message}", "Ошибка");

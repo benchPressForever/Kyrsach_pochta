@@ -734,7 +734,7 @@ namespace kyrsach_pochta {
                 this.columnЭлектронная_почта.AllowDBNull = false;
                 this.columnЭлектронная_почта.MaxLength = 100;
                 this.columnПароль.AllowDBNull = false;
-                this.columnПароль.MaxLength = 50;
+                this.columnПароль.MaxLength = 60;
                 this.columnТелефон.AllowDBNull = false;
                 this.columnТелефон.MaxLength = 20;
             }
@@ -2508,7 +2508,7 @@ namespace kyrsach_pochta {
                 this.columnЛогин.AllowDBNull = false;
                 this.columnЛогин.MaxLength = 50;
                 this.columnПароль.AllowDBNull = false;
-                this.columnПароль.MaxLength = 50;
+                this.columnПароль.MaxLength = 60;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
