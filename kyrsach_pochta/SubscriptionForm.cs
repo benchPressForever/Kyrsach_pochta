@@ -21,6 +21,8 @@ namespace kyrsach_pochta
             InitializeComponent();
 
             dtpStartDate.Value = DateTime.Today;
+            dtpStartDate.MinDate = DateTime.Today;
+            dtpStartDate.MaxDate = DateTime.Today.AddYears(2);
 
             startForm = form;
             clientInfo = CurrentSession.Client;
@@ -35,17 +37,17 @@ namespace kyrsach_pochta
         {
             try
             {
+                sqlCommand3.Parameters["@userId"].Value = clientInfo.Id;
+
                 mySqlConnection.Open();
 
                 var id = clientInfo.Id;
 
                 var temp = new DataTable();
-                temp.Load(new SqlCommand(
-                    $@"select Дата_оформления, Дата_окончания,Стоимость,Статус  
-                    from Подписка_на_издание where Код_клиента = {id}",
-                mySqlConnection).ExecuteReader());
+                temp.Load(sqlCommand3.ExecuteReader());
 
                 dataGridViewMySubs.DataSource = temp;
+                dataGridViewMySubs.Columns["Код_подписки"].Visible = false;
 
                 mySqlConnection.Close();
             }
@@ -69,9 +71,8 @@ namespace kyrsach_pochta
                 mySqlConnection.Open();
 
                 var temp = new DataTable();
-                temp.Load(new SqlCommand(
-                    @"select * from Периодическое_издание",
-                mySqlConnection).ExecuteReader());
+
+                temp.Load(sqlCommand2.ExecuteReader());
 
                 dataGridViewAllEditions.DataSource = temp;
 
@@ -93,21 +94,23 @@ namespace kyrsach_pochta
         {
             try
             {
-                int idSub = 1001;
-                int idEd = Convert.ToInt32(idEdition.Text);
-                DateTime startDate = dtpStartDate.Value.Date;
-                DateTime endDate = startDate.AddMonths((int)numMonths.Value);
+                int mounts = Convert.ToInt32(numMonths.Value);
+
+                sqlCommand1.Parameters["@userId"].Value = clientInfo.Id;
+                sqlCommand1.Parameters["@idEdition"].Value = Convert.ToInt32(idEdition.Text);
+                sqlCommand1.Parameters["@startDate"].Value = dtpStartDate.Value.Date;
+                sqlCommand1.Parameters["@endDate"].Value = dtpStartDate.Value.Date.AddMonths(mounts);
 
                 mySqlConnection.Open();
 
-                string query = $@"insert into Подписка_на_издание 
-                (Код_подписки, Код_клиента, Код_издания, Дата_оформления, Дата_окончания, Статус)
-                values ({idSub},{clientInfo.Id},{idEd},'{startDate:yyyy-MM-dd}','{endDate:yyyy-MM-dd}','активна')";
-
-                SqlCommand cmd = new SqlCommand(query, mySqlConnection);
-                cmd.ExecuteNonQuery();
+                sqlCommand1.ExecuteNonQuery();
 
                 mySqlConnection.Close();
+
+                loadClientSubs();
+
+                MessageBox.Show($"Успешно: подписка успешно оформлена!", "успешно",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             }
             catch (Exception ex)
@@ -126,6 +129,60 @@ namespace kyrsach_pochta
         {
             this.Close();
             startForm.Visible = true;
+        }
+
+        private void btnExtend_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DataGridViewRow row = dataGridViewMySubs.CurrentRow;
+                int idSub = Convert.ToInt32(row.Cells["Код_подписки"].Value);
+
+                object cellValue = row.Cells["Код_подписки"].Value;
+
+                if (cellValue == null || cellValue == DBNull.Value)
+                {
+                    MessageBox.Show("Код подписки пустой!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                int mounts = Convert.ToInt32(numExtendMonths.Value);
+
+                sqlCommand4.Parameters["@mounts"].Value = mounts;
+                sqlCommand4.Parameters["@idSub"].Value = idSub;
+
+                mySqlConnection.Open();
+
+                sqlCommand4.ExecuteNonQuery();
+
+                mySqlConnection.Close();
+
+                loadClientSubs();
+
+                MessageBox.Show($"Успешно: подписка успешно продлена на {mounts} месяцев!", "успешно",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (mySqlConnection.State == ConnectionState.Open)
+                    mySqlConnection.Close();
+            }
+        }
+
+        private void btnCloseExpired_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonCount_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
