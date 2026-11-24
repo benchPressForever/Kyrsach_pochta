@@ -101,6 +101,7 @@
             this.Controls.Add(this.label1);
             this.Name = "ActionManagerForm";
             this.Text = "v";
+            this.Load += new System.EventHandler(this.ActionManagerForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

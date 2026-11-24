@@ -40,7 +40,6 @@ namespace kyrsach_pochta
             {
                 var email = EmailTextBox.Text.Trim();
                 var password = PasswordTextBox.Text.Trim();
-                var heshPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 var client = kyrsachDataSet.Клиент.FirstOrDefault(c => c.Электронная_почта == email);
 
@@ -51,9 +50,9 @@ namespace kyrsach_pochta
                     return;
                 }
 
-                bool isValid = BCrypt.Net.BCrypt.Verify(heshPassword, client.Пароль);
+                bool isValid = BCrypt.Net.BCrypt.Verify(password, client.Пароль);
 
-                if (isValid)
+                if (!isValid)
                 {
                     MessageBox.Show("Неверный пароль!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     PasswordTextBox.Focus();

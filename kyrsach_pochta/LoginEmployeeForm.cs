@@ -29,7 +29,6 @@ namespace kyrsach_pochta
             {
                 var password = PasswordTextBox2.Text.Trim();
                 var login = EmailTextBox2.Text.Trim();
-                var heshPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
                 var client = kyrsachDataSet.Сотрудник.FirstOrDefault(c => c.Логин == login);
 
@@ -40,16 +39,16 @@ namespace kyrsach_pochta
                     return;
                 }
 
-                bool isValid = BCrypt.Net.BCrypt.Verify(heshPassword, client.Пароль);
+                bool isValid = BCrypt.Net.BCrypt.Verify(password, client.Пароль);
 
-                if (isValid)
+                if (!isValid)
                 {
                     MessageBox.Show("Неверный пароль!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     PasswordTextBox2.Focus();
                     return;
                 }
 
-
+                CurrentSession.LoginEmployee(client);
                 MessageBox.Show($"Добро пожаловать, {client.ФИО}!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 if(client.Должность == "Оператор")

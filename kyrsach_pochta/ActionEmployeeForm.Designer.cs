@@ -127,6 +127,7 @@
             this.Controls.Add(this.label1);
             this.Name = "ActionEmployeeForm";
             this.Text = "MainFormEmployer";
+            this.Load += new System.EventHandler(this.ActionEmployeeForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -70,13 +70,21 @@ namespace kyrsach_pochta
 
             try
             {
+                var id = 1;
+                if(kyrsachDataSet.Клиент.Count > 0)
+                {
+                    id = kyrsachDataSet.Клиент.Max(c => c.Код_клиента) + 1;
+                }
+
                 var newRow = kyrsachDataSet.Клиент.NewКлиентRow();
+                newRow.Код_клиента = id;
                 newRow.Пароль = BCrypt.Net.BCrypt.HashPassword(password);
                 newRow.Телефон = number;
                 newRow.ФИО = fio;
                 newRow.Электронная_почта = email;
                 kyrsachDataSet.Клиент.AddКлиентRow(newRow);
                 клиентTableAdapter.Update(kyrsachDataSet.Клиент);
+                CurrentSession.LoginClient(newRow);
                 MessageBox.Show("Регистрация успешна!", "Успех");
 
                 Form actionForm = new ActionClientForm(startForm);

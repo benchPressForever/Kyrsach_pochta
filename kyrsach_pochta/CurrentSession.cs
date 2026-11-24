@@ -9,7 +9,10 @@ namespace kyrsach_pochta
     internal class CurrentSession
     {
         public static ClientInfo Client { get; private set; }
-        public static bool IsLoggedIn => Client != null;
+        public static bool IsclientLoggedIn => Client != null;
+
+        public static EmployeeInfo Employee { get; private set; }
+        public static bool IsEmployeeLoggedIn => Employee != null;
 
         public static void LoginClient(kyrsachDataSet.КлиентRow row)
         {
@@ -22,7 +25,21 @@ namespace kyrsach_pochta
             };
         }
 
-        public static void Logout() => Client = null;
+        public static void LoginEmployee(kyrsachDataSet.СотрудникRow row)
+{
+    Employee = new EmployeeInfo
+    {
+        Id = row.Код_сотрудника,
+        Fio = row.ФИО,
+        Role = row.Должность,
+        Login = row.Логин
+    };
+}
+
+        public static void Logout() {
+            Client = null;
+            Employee = null;
+        }
 
 
     }

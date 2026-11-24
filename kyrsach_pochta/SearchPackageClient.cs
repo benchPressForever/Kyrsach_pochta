@@ -25,144 +25,11 @@ namespace kyrsach_pochta
             clientInfo = CurrentSession.Client;
         }
 
-        private void MainFormClient_Load(object sender, EventArgs e)
-        {
-            // TODO: данная строка кода позволяет загрузить данные в таблицу "kyrsachDataSet.Статус_отправления". При необходимости она может быть перемещена или удалена.
-            this.статус_отправленияTableAdapter.Fill(this.kyrsachDataSet.Статус_отправления);
-            // TODO: данная строка кода позволяет загрузить данные в таблицу "kyrsachDataSet.Отправление". При необходимости она может быть перемещена или удалена.
-            this.отправлениеTableAdapter.Fill(this.kyrsachDataSet.Отправление);
-            // TODO: данная строка кода позволяет загрузить данные в таблицу "kyrsachDataSet.Клиент". При необходимости она может быть перемещена или удалена.
-            this.клиентTableAdapter.Fill(this.kyrsachDataSet.Клиент);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            int packageId = (int) numericUpDown1.Value;
-
-            var package = kyrsachDataSet.Отправление.FirstOrDefault(
-                c => c.Код_отправления == packageId 
-                && c.Код_клиента_получателя ==  clientInfo.Id
-                || c.Код_отправления == packageId
-                && c.Код_клиента_отправителя == clientInfo.Id);
-
-            if (package == null)
-            {
-                MessageBox.Show($"Отправление с ID {packageId} не найдено.", "Не найдено",
-                                MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            var temp = kyrsachDataSet.Отправление.Clone();
-
-            temp.Rows.Add(
-                package.Код_отправления,
-                package.Дата_приёма,
-                (object)package.Адрес_отправителя ?? DBNull.Value,
-                (object)package.Адрес_получателя ?? DBNull.Value,
-                package.Код_клиента_отправителя,
-                package.Код_клиента_получателя,
-                (object)package.Вид_отправления ?? DBNull.Value,
-                package.Вес,
-                package.Объявленная_ценность,
-                package.Стоимость_доставки,
-                (object)package.Трек_номер ?? DBNull.Value
-            );
-
-
-            dataGridViewPackages.DataSource = temp;
-
-            MessageBox.Show($"Отправление {package.Код_отправления} найдено!", "Успех",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        }
-
-        private void клиентBindingNavigatorSaveItem_Click(object sender, EventArgs e)
-        {
-            this.Validate();
-            this.клиентBindingSource.EndEdit();
-            this.tableAdapterManager.UpdateAll(this.kyrsachDataSet);
-
-        }
-
-        private void loadList(List<kyrsachDataSet.ОтправлениеRow> packages)
-        {
-            dataGridViewPackages.DataSource = null;
-            var temp = kyrsachDataSet.Отправление.Clone();
-
-            foreach (var package in packages)
-            {
-                temp.Rows.Add(
-                    package.Код_отправления,
-                    package.Дата_приёма,
-                    (object)package.Адрес_отправителя ?? DBNull.Value,
-                    (object)package.Адрес_получателя ?? DBNull.Value,
-                    package.Код_клиента_отправителя,
-                    package.Код_клиента_получателя,
-                    (object)package.Вид_отправления ?? DBNull.Value,
-                    package.Вес,
-                    package.Объявленная_ценность,
-                    package.Стоимость_доставки,
-                    (object)package.Трек_номер ?? DBNull.Value
-                );
-            }
-            dataGridViewPackages.DataSource = temp;
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            var packages = kyrsachDataSet.Отправление
-            .Where(c => c.Код_клиента_получателя == clientInfo.Id
-                     || c.Код_клиента_отправителя == clientInfo.Id)
-            .ToList();
-
-            loadList(packages);
-        }
-
-        private void filterStatus(String status)
-        {
-            sqlCommand1.Parameters["@userId"].Value = (int)clientInfo.Id;
-            sqlCommand1.Parameters["@status"].Value = status;
-
-            sqlConnection1.Open();
-
-            var temp = kyrsachDataSet.Отправление.Clone();
-
-            temp.Load(sqlCommand1.ExecuteReader());
-
-            dataGridViewPackages.DataSource = temp;
-
-            sqlConnection1.Close();
-        }
-
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            filterStatus("зарегистрировано");
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
             this.Close();
             startForm.Visible = true;
-        }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-            filterStatus("транспортируется");
-        }
-
-        private void checkBox4_CheckedChanged(object sender, EventArgs e)
-        {
-            filterStatus("готово_к_выдаче");
-        }
-
-        private void checkBox5_CheckedChanged(object sender, EventArgs e)
-        {
-            filterStatus("выдано");
-        }
-
-        private void checkBox6_CheckedChanged(object sender, EventArgs e)
-        {
-            filterStatus("утилизировано");
         }
 
         private void dataGridViewPackages_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -175,22 +42,58 @@ namespace kyrsach_pochta
 
                 Package package = new Package
                 {
-                    Id = Convert.ToInt32(rowData["Код_отправления"]),
-                    AcceptDate = Convert.ToDateTime(rowData["Дата_приёма"]),
-                    SenderAddress = rowData["Адрес_отправителя"].ToString(),
-                    RecipientAddress = rowData["Адрес_получателя"].ToString(),
-                    SenderId = Convert.ToInt32(rowData["Код_клиента_отправителя"]),
-                    RecipientId = Convert.ToInt32(rowData["Код_клиента_получателя"]),
-                    Type = rowData["Вид_отправления"].ToString(),
+                    TrackNumber = rowData["Трек номер"].ToString(),
+                    AcceptDate = Convert.ToDateTime(rowData["Дата приёма"]),
+                    SenderAddress = rowData["Адрес отправителя"].ToString(),
+                    RecipientAddress = rowData["Адрес получателя"].ToString(),
+                    Type = rowData["Вид отправления"].ToString(),
+                    Status = rowData["Статус"].ToString(),
                     Weight = Convert.ToDecimal(rowData["Вес"]),
-                    DeclaredValue = Convert.ToDecimal(rowData["Объявленная_ценность"]),
-                    DeliveryCost = Convert.ToDecimal(rowData["Стоимость_доставки"]),
-                    TrackNumber = rowData["Трек_номер"].ToString()
+                    DeclaredValue = Convert.ToDecimal(rowData["Объявленная ценность"])
                 };
 
                 Form form = new FormPackageDetails(package);
                 form.Show();
             }
+        }
+
+        private void comboBoxStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string status = comboBoxStatus.Text;
+
+            sqlCommand2.Parameters["@status"].Value = status;
+            sqlCommand2.Parameters["@userId"].Value = clientInfo.Id;
+
+            mySqlConnection.Open();
+
+            var temp = new DataTable();
+
+            temp.Load(sqlCommand2.ExecuteReader());
+
+            dataGridViewPackages.DataSource = temp;
+
+            dataGridViewPackages.Columns["Вес"].Visible = false;
+            dataGridViewPackages.Columns["Объявленная ценность"].Visible = false;
+
+            mySqlConnection.Close();
+        }
+
+        private void buttonSearch_Click(object sender, EventArgs e)
+        {
+            sqlCommand1.Parameters["@trackNumber"].Value = textTrackNum.Text;
+
+            mySqlConnection.Open();
+
+            var temp = new DataTable();
+
+            temp.Load(sqlCommand1.ExecuteReader());
+
+            dataGridViewPackages.DataSource = temp;
+
+            dataGridViewPackages.Columns["Вес"].Visible = false;
+            dataGridViewPackages.Columns["Объявленная ценность"].Visible = false;
+
+            mySqlConnection.Close();
         }
     }
 }

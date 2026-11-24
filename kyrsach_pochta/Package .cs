@@ -19,5 +19,6 @@ namespace kyrsach_pochta
         public decimal DeclaredValue { get; set; }
         public decimal DeliveryCost { get; set; }
         public string TrackNumber { get; set; }
+        public string Status { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace kyrsach_pochta
 {
@@ -20,48 +21,46 @@ namespace kyrsach_pochta
             InitializeComponent();
 
             package = p;
-            labelId.Text = p.Id.ToString();
             TrackNumber.Text = p.TrackNumber.ToString();
             Type.Text = p.Type.ToString();
-            Date.Text = p.AcceptDate.ToString();
+            Date.Text = p.AcceptDate.ToShortDateString();
             Sender.Text = p.SenderAddress.ToString();
             Recipient.Text = p.RecipientAddress.ToString();
-            labelPrice.Text = p.Weight.ToString() + " кг / " + p.DeclaredValue.ToString() + " руб. / " + p.DeliveryCost.ToString() + " руб.";
+            labelWeight.Text = p.Weight.ToString() + " кг";
+            labelPrice.Text = p.DeclaredValue.ToString() + " руб.";
+            currentStatus.Text = p.Status.ToString();
+        }
 
-            mySqlConnection.Open();
+        private void loadStatuses()
+        {
+            try
+            {
+                sqlCommand1.Parameters["@trackNumber"].Value = package.TrackNumber.ToString();
 
-            var id = p.Id.ToString();
+                mySqlConnection.Open();
 
-            var temp = new DataTable();
-            temp.Load(new SqlCommand(
-                $"select * from Статус_отправления where Код_отправления = {id} " +
-               "order by Дата_и_время, Код_статуса",
-               mySqlConnection).ExecuteReader());
+                var temp = new DataTable();
+                temp.Load(sqlCommand1.ExecuteReader());
 
-            dataGridViewStatus.DataSource = temp;
+                dataGridViewStatus.DataSource = temp;
 
-            mySqlConnection.Close();
-
-            if (temp.Rows.Count > 0)
-                currentStatus.Text = temp.Rows[temp.Rows.Count - 1]["Статус"].ToString();
-            else
-                currentStatus.Text = "нет статусов";
-
+                mySqlConnection.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке истории статусов: {ex.Message}", "Ошибка",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                if (mySqlConnection.State == ConnectionState.Open)
+                    mySqlConnection.Close();
+            }
         }
 
         private void FormPackageDetails_Load(object sender, EventArgs e)
         {
-
-        }
-
-        private void IdOtpr_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
+            loadStatuses();
         }
     }
 }

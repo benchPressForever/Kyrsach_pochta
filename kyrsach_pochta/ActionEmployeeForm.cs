@@ -35,5 +35,10 @@ namespace kyrsach_pochta
             startForm.Show();
             this.Hide();
         }
+
+        private void ActionEmployeeForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

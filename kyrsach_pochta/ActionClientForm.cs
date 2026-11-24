@@ -33,5 +33,31 @@ namespace kyrsach_pochta
             startForm.Show();
             this.Hide();
         }
+
+        private void ActionClientForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Form form = new SubscriptionForm(this);
+            form.Show();
+            this.Hide();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form form = new CourierDeliveryForm(this);
+            form.Show();
+            this.Hide();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Form form = new EditProfileForm(this);
+            form.Show();
+            this.Hide();
+        }
     }
 }
